@@ -1,25 +1,57 @@
+import dayjs from 'dayjs';
 import { createElement } from '../render.js';
 
-function createPointTemplate() {
-  return (
-    `
-    <li li class="trip-events__item" >
+const DATE_ATTR_FORMAT = 'YYYY-MM-DD';
+const DATE_DISPLAY_FORMAT = 'MMM DD';
+const TIME_FORMAT = 'HH:mm';
+
+function formatDuration(start, end) {
+  const diffMs = end - start;
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
+}
+
+function createPointTemplate(point, destination) {
+  let cityName = '—';
+  for (const dest of destination) {
+    if (dest.id === point.destinationId) {
+      cityName = dest.name;
+      break;
+    }
+  }
+
+  const type = point.type;
+
+  const start = new Date(point.startTime);
+  const end = new Date(point.endTime);
+
+  const dateAttr = dayjs(start).format(DATE_ATTR_FORMAT);
+  const dateDisplay = dayjs(start).format(DATE_DISPLAY_FORMAT).toUpperCase();
+  const timeStart = dayjs(start).format(TIME_FORMAT);
+  const timeEnd = dayjs(end).format(TIME_FORMAT);
+  const duration = formatDuration(start, end);
+  const price = point.basePrice;
+
+  return `
+    <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="2019-03-20">MAR 20</time>
+        <time class="event__date" datetime="${dateAttr}">${dateDisplay}</time>
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/sightseeing.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">Sightseeing Geneva</h3>
+        <h3 class="event__title">${type} ${cityName}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-20T11:15">11:15</time>
+            <time class="event__start-time" datetime="${dayjs(start).format('YYYY-MM-DDTHH:mm')}">${timeStart}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-20T12:15">12:15</time>
+            <time class="event__end-time" datetime="${dayjs(end).format('YYYY-MM-DDTHH:mm')}">${timeEnd}</time>
           </p>
-          <p class="event__duration">01H 00M</p>
+          <p class="event__duration">${duration}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">180</span>
+          &euro;&nbsp;<span class="event__price-value">${price}</span>
         </p>
         <button class="event__favorite-btn" type="button">
           <span class="visually-hidden">Add to favorite</span>
@@ -32,20 +64,23 @@ function createPointTemplate() {
         </button>
       </div>
     </li>
-    `
-  );
+  `;
 }
 
 export default class RoutePointView {
+  constructor(point, destination) {
+    this.point = point;
+    this.destination = destination;
+  }
+
   getTemplate() {
-    return createPointTemplate();
+    return createPointTemplate(this.point, this.destination);
   }
 
   getElement() {
     if (!this.element) {
       this.element = createElement(this.getTemplate());
     }
-
     return this.element;
   }
 
