@@ -34,6 +34,14 @@ function generatePictureUrl(seed) {
   return `https://loremflickr.com/248/152?random=${seed}`;
 }
 
+function formatDuration(start, end) {
+  const diffMs = end - start;
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
+}
+
 export {
   getRandomInt,
   getRandomIntInRange,
@@ -41,5 +49,6 @@ export {
   getRandomSubarray,
   getRandomDate,
   addRandomDuration,
-  generatePictureUrl
+  generatePictureUrl,
+  formatDuration,
 };

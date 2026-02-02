@@ -1,28 +1,13 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { formatDuration, getRandomSubarray } from '../utils.js';
 
 const DATE_ATTR_FORMAT = 'YYYY-MM-DD';
 const DATE_DISPLAY_FORMAT = 'MMM DD';
 const TIME_FORMAT = 'HH:mm';
 
-function formatDuration(start, end) {
-  const diffMs = end - start;
-  const totalMinutes = Math.floor(diffMs / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
-}
-
-function createPointTemplate(point, destination) {
-  let cityName = '—';
-  for (const dest of destination) {
-    if (dest.id === point.destinationId) {
-      cityName = dest.name;
-      break;
-    }
-  }
-
-  const type = point.type;
+function createPointTemplate(point, allOffersByType) {
+  const { type, cityName, basePrice, isFavorite } = point;
 
   const start = new Date(point.startTime);
   const end = new Date(point.endTime);
@@ -32,7 +17,21 @@ function createPointTemplate(point, destination) {
   const timeStart = dayjs(start).format(TIME_FORMAT);
   const timeEnd = dayjs(end).format(TIME_FORMAT);
   const duration = formatDuration(start, end);
-  const price = point.basePrice;
+
+  const availableOffers = allOffersByType[type] || [];
+  const selectedOffers = getRandomSubarray(availableOffers);
+
+  const offersList = selectedOffers.map((offer) => `
+    <li class="event__offer">
+      <span class="event__offer-title">${offer.title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${offer.price}</span>
+    </li>
+  `).join('');
+
+  const favoriteBtnClass = isFavorite
+    ? 'event__favorite-btn event__favorite-btn--active'
+    : 'event__favorite-btn';
 
   return `
     <li class="trip-events__item">
@@ -51,9 +50,13 @@ function createPointTemplate(point, destination) {
           <p class="event__duration">${duration}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${price}</span>
+          &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
         </p>
-        <button class="event__favorite-btn" type="button">
+         <h4 class="visually-hidden">Offers:</h4>
+        <ul class="event__selected-offers">
+          ${offersList}
+        </ul>
+        <button class="${favoriteBtnClass}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z" />
@@ -67,24 +70,29 @@ function createPointTemplate(point, destination) {
   `;
 }
 
-export default class RoutePointView {
-  constructor(point, destination) {
-    this.point = point;
-    this.destination = destination;
+export default class RoutePointView extends AbstractView {
+  #point = null;
+  #offers = null;
+  #onOpenEditButtonClick = null;
+
+  constructor({ point, offers, onEditClick }) {
+    super();
+    this.#point = point;
+    this.#offers = offers;
+    this.#onOpenEditButtonClick = onEditClick;
+    this.#setEventListeners();
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point, this.destination);
+  get template() {
+    return createPointTemplate(this.#point, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
+  #setEventListeners() {
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onOpenEditButtonClickHandler);
   }
 
-  removeElement() {
-    this.element = null;
-  }
+  #onOpenEditButtonClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onOpenEditButtonClick();
+  };
 }

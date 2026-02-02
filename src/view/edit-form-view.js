@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
@@ -189,25 +189,31 @@ function createEditFormTemplate(data) {
   `;
 }
 
-export default class EditFormView {
-  #data;
+export default class EditFormView extends AbstractView {
+  #data = null;
+  #handleFormSubmit = null;
+  #handleFormClick = null;
 
-  constructor(data) {
-    this.#data = data;
+  constructor({ point, destination, offers, onFormSubmit, onFormClick }) {
+    super();
+    this.#data = { point, destination, offers };
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormClick = onFormClick;
+
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formClickHandler);
   }
 
-  getTemplate() {
+  get template() {
     return createEditFormTemplate(this.#data);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-  removeElement() {
-    this.element = null;
-  }
+  #formClickHandler = () => {
+    this.#handleFormSubmit();
+  };
 }
