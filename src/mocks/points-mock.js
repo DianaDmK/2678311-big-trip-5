@@ -5,16 +5,15 @@ import {
   MAX_BASE_PRICE,
   MAX_DURATION_HOURS,
   POINT_COUNT,
-  CITIES
 } from '../const.js';
 import { DESTINATIONS } from './destinations-mock.js';
 import { OFFERS } from './offers-mock.js';
 import { nanoid } from 'nanoid';
 
 function generateRoutePoint() {
-  const cityName = getRandomArrayItem(CITIES);
-  const type = getRandomArrayItem(TYPES);
   const destination = getRandomArrayItem(DESTINATIONS);
+  const cityName = destination.name;
+  const type = getRandomArrayItem(TYPES);
   const startTime = getRandomDate();
   const endTime = addRandomDuration(startTime, MAX_DURATION_HOURS);
   const basePrice = getRandomIntInRange(MIN_BASE_PRICE, MAX_BASE_PRICE);

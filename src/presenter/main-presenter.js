@@ -26,7 +26,7 @@ export default class MainPresenter {
   }
 
   init() {
-    const { points, destination, offers } = this.#tripModel;
+    const { points, destinations, offers } = this.#tripModel;
     this.#points = [...points];
 
     this.#sortPoints(this.#currentSortType);
@@ -35,7 +35,7 @@ export default class MainPresenter {
     this.#renderFilters();
     this.#renderSort();
     this.#renderPointList();
-    this.#renderPoint(points, destination, offers);
+    this.#renderPoint(points, destinations, offers);
   }
 
   #renderSort() {
@@ -65,9 +65,10 @@ export default class MainPresenter {
         pointListContainer: this.#pointListComponent.element,
         onDataChange: this.#handlePointChange,
         onModeChange: this.#handleModeChange,
-        destination: this.#tripModel.destination,
+        destinations: this.#tripModel.destinations,
         offers: this.#tripModel.offers
       });
+
       pointPresenter.init(point);
       this.#pointPresenters.set(point.id, pointPresenter);
     });

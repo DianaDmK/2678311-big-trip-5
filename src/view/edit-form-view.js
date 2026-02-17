@@ -63,15 +63,16 @@ function createOffersList(offersByType, pointType, selectedOfferIds) {
 }
 
 function createEditFormTemplate(state) {
-  const { type: currentType, destinationId, startTime, endTime, basePrice, offers: selectedOffers, destination, availableOffers } = state;
+  const { type: currentType, destinationId, startTime, endTime, basePrice, offers: selectedOffers, destinations, availableOffers } = state;
   const typeSelector = createTypeSelector(currentType);
 
-  const selectedDest = destination.find((d) => d.id === destinationId) || destination[0] || null;
+  const selectedDest = destinations.find((d) => d.id === destinationId) || destinations[0] || null;
 
   const selectedDestId = selectedDest ? selectedDest.id : '';
+
   const description = selectedDest ? selectedDest.description : '';
   const selectedDestName = selectedDest ? selectedDest.name : '';
-  const destinationsOptions = createDestinationsOptions(destination, selectedDestId);
+  const destinationsOptions = createDestinationsOptions(destinations, selectedDestId);
 
   const startTimeFormatted = formatDateTime(startTime);
   const endTimeFormatted = formatDateTime(endTime);
@@ -105,7 +106,7 @@ function createEditFormTemplate(state) {
             <label class="event__label event__type-output" for="event-destination-1">
               ${currentType}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${selectedDestName}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${selectedDestName}" list="destination-list-1" />
             <datalist id="destination-list-1">
               ${destinationsOptions}
             </datalist>
@@ -174,9 +175,9 @@ export default class EditFormView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormClose = null;
 
-  constructor({ point, destination, offers, onFormSubmit, onFormClose }) {
+  constructor({ point, destinations, offers, onFormSubmit, onFormClose }) {
     super();
-    this._setState(EditFormView.parseFormDataToState({ point, destination, offers }));
+    this._setState(EditFormView.parseFormDataToState({ point, destinations, offers }));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
 
@@ -216,8 +217,9 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
+    const destinationId = evt.target.value;
     this.updateElement({
-      destinationId: evt.target.value
+      destinationId
     });
   };
 
@@ -241,7 +243,7 @@ export default class EditFormView extends AbstractStatefulView {
     });
   };
 
-  static parseFormDataToState({ point, destination, offers }) {
-    return { ...point, destination, availableOffers: offers };
+  static parseFormDataToState({ point, destinations, offers }) {
+    return { ...point, destinations, availableOffers: offers };
   }
 }
