@@ -105,7 +105,7 @@ function createEditFormTemplate(state) {
             <label class="event__label event__type-output" for="event-destination-1">
               ${currentType}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${selectedDestName}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${selectedDestName}" list="destination-list-1">${destinationsOptions}</>
             <datalist id="destination-list-1">
               ${destinationsOptions}
             </datalist>
@@ -216,8 +216,9 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
+    const destinationId = evt.target.value;
     this.updateElement({
-      destinationId: evt.target.value
+      destinationId
     });
   };
 
