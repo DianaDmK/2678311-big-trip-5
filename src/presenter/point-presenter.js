@@ -33,7 +33,7 @@ export default class PointPresenter {
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
-    
+
     this.#pointEditComponent = new EditFormView({
       point: this.#point,
       destinations: this.#destinations,
