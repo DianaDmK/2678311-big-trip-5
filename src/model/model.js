@@ -5,7 +5,7 @@ import { OFFERS } from '../mocks/offers-mock.js';
 function createModel() {
   return {
     points: POINTS,
-    destination: DESTINATIONS,
+    destinations: DESTINATIONS,
     offers: OFFERS
   };
 }
