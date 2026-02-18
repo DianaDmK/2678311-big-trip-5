@@ -62,8 +62,9 @@ function createOffersList(offersByType, pointType, selectedOfferIds) {
   }).join('');
 }
 
-function createEditFormTemplate(state) {
-  const { type: currentType, destinationId, startTime, endTime, basePrice, offers: selectedOffers, destinations, availableOffers } = state;
+function createEditFormTemplate(state, availableOffers, destinations) {
+  const { type: currentType, destinationId, startTime, endTime, basePrice, offers: selectedOffers } = state;
+
   const typeSelector = createTypeSelector(currentType);
 
   const selectedDest = destinations.find((d) => d.id === destinationId) || destinations[0] || null;
@@ -174,18 +175,23 @@ function createEditFormTemplate(state) {
 export default class EditFormView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormClose = null;
+  #destinations = null;
+  #offers = null;
 
   constructor({ point, destinations, offers, onFormSubmit, onFormClose }) {
     super();
-    this._setState(EditFormView.parseFormDataToState({ point, destinations, offers }));
+    this._setState(EditFormView.parseFormDataToState(point));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
+    this.#destinations = destinations;
+    this.#offers = offers;
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createEditFormTemplate(this._state);
+    return createEditFormTemplate(this._state, this.#offers, this.#destinations);
+
   }
 
   _restoreHandlers() {
@@ -243,7 +249,7 @@ export default class EditFormView extends AbstractStatefulView {
     });
   };
 
-  static parseFormDataToState({ point, destinations, offers }) {
-    return { ...point, destinations, availableOffers: offers };
+  static parseFormDataToState(point) {
+    return { ...point };
   }
 }
