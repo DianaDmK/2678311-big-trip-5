@@ -71,6 +71,8 @@ const SORT_TYPE = {
   PRICE: 'price',
 };
 
+const DATE_FORMAT = 'd/m/y H:i';
+
 export {
   TYPES,
   DESCRIPTION,
@@ -87,5 +89,6 @@ export {
   MAX_DURATION_HOURS,
   POINT_COUNT,
   MODE,
-  SORT_TYPE
+  SORT_TYPE,
+  DATE_FORMAT
 };
