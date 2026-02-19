@@ -15,7 +15,7 @@ const CITIES = [
   'Tokyo',
   'London',
   'Macau',
-  'Dubai ',
+  'Dubai',
   'Istanbul',
 ];
 

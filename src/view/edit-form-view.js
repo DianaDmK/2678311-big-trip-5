@@ -191,7 +191,6 @@ export default class EditFormView extends AbstractStatefulView {
 
   get template() {
     return createEditFormTemplate(this._state, this.#offers, this.#destinations);
-
   }
 
   _restoreHandlers() {
@@ -222,10 +221,12 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
-    evt.preventDefault();
-    const destinationId = evt.target.value;
+    const destinationName = evt.target.value;
+    const destination = this.#destinations.find((d) => d.name === destinationName);
+
     this.updateElement({
-      destinationId
+      destinationId: destination.id,
+      cityName: destination.name
     });
   };
 
