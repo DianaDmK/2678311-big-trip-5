@@ -64,7 +64,7 @@ function updateItem(items, update) {
   return items.map((item) => item.id === update.id ? update : item);
 }
 function formatDateTime(date) {
-  return dayjs(date).format('HH:mm');
+  return dayjs(date).format('DD/MM/YY HH:mm');
 }
 
 export {
