@@ -1,5 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { formatDateTime } from '../utils.js';
+import { DATE_FORMAT } from '../const.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const POINTS_TYPE = [
   'Taxi', 'Bus', 'Train', 'Ship', 'Drive',
@@ -63,7 +66,13 @@ function createOffersList(offersByType, pointType, selectedOfferIds) {
 }
 
 function createEditFormTemplate(state, availableOffers, destinations) {
-  const { type: currentType, destinationId, startTime, endTime, basePrice, offers: selectedOffers } = state;
+  const {
+    type: currentType,
+    destinationId,
+    startTime = new Date(),
+    endTime = new Date(),
+    basePrice,
+    offers: selectedOffers } = state;
 
   const typeSelector = createTypeSelector(currentType);
 
@@ -175,6 +184,8 @@ function createEditFormTemplate(state, availableOffers, destinations) {
 export default class EditFormView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormClose = null;
+  #datepickerStart = null;
+  #datepickerEnd = null;
   #destinations = null;
   #offers = null;
 
@@ -191,7 +202,6 @@ export default class EditFormView extends AbstractStatefulView {
 
   get template() {
     return createEditFormTemplate(this._state, this.#offers, this.#destinations);
-
   }
 
   _restoreHandlers() {
@@ -201,6 +211,8 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
+    this.#setDatepickerStart();
+    this.#setDatepickerEnd();
   }
 
   #formSubmitHandler = (evt) => {
@@ -222,10 +234,12 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
-    evt.preventDefault();
-    const destinationId = evt.target.value;
+    const destinationName = evt.target.value;
+    const destination = this.#destinations.find((d) => d.name === destinationName);
+
     this.updateElement({
-      destinationId
+      destinationId: destination.id,
+      cityName: destination.name
     });
   };
 
@@ -243,7 +257,6 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #priceInputHandler = (evt) => {
-    evt.preventDefault();
     this.updateElement({
       basePrice: evt.target.value
     });
@@ -251,5 +264,65 @@ export default class EditFormView extends AbstractStatefulView {
 
   static parseFormDataToState(point) {
     return { ...point };
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  }
+
+  #dateStartChangeHandler = ([userDate]) => {
+    this.updateElement({
+      startTime: userDate,
+    });
+  };
+
+  #dateEndChangeHandler = ([userDate]) => {
+    this.updateElement({
+      endTime: userDate,
+    });
+  };
+
+  #setDatepickerStart() {
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: DATE_FORMAT,
+        defaultDate: this._state.startTime,
+        enableTime: true,
+        'time_24hr': true,
+        minDate: 'today',
+        maxDate: this._state.endTime,
+        onChange: this.#dateStartChangeHandler,
+      },
+    );
+  }
+
+  #setDatepickerEnd() {
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: DATE_FORMAT,
+        defaultDate: this._state.endTime,
+        enableTime: true,
+        'time_24hr': true,
+        minDate: this._state.startTime,
+        onChange: this.#dateEndChangeHandler,
+      },
+    );
+  }
+
+  requestDate() {
+    this.#setDatepickerStart();
+    this.#setDatepickerEnd();
   }
 }
