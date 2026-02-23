@@ -1,6 +1,6 @@
 import PointsModel from './model/points-model.js';
 import MainPresenter from './presenter/main-presenter.js';
-import FilterPresenter from './model/filter-model.js';
+import FilterPresenter from './presenter/filter-presenter.js';
 import FilterModel from './model/filter-model.js';
 import NewPointButtonView from './view/new-point-button-view.js';
 import { render } from './framework/render.js';
@@ -21,7 +21,7 @@ const mainPresenter = new MainPresenter({
 });
 
 const filterPresenter = new FilterPresenter({
-  filterContainer: tripMainContainer,
+  filterContainer: filtersContainer,
   filterModel,
   tripModel
 });

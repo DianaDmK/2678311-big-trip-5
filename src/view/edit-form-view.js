@@ -67,6 +67,7 @@ function createOffersList(offersByType, pointType, selectedOfferIds) {
 }
 
 function createEditFormTemplate(state, availableOffers, destinations) {
+  // const destList = destinations ?? [];
   const {
     type: currentType,
     destinationId,
@@ -151,7 +152,7 @@ function createEditFormTemplate(state, availableOffers, destinations) {
               id="event-price-1"
               type="text"
               name="event-price"
-              value="${he.encode(Number(basePrice))}"
+              value="${basePrice}"
             >
           </div>
           <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -221,7 +222,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formDeleteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleDeleteClick(EditFormView.parseStateToTask(this._state));
+    this.#handleDeleteClick(EditFormView.parseFormDataToState(this._state));
   };
 
   #formSubmitHandler = (evt) => {
@@ -244,12 +245,14 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     const destinationName = evt.target.value;
-    const destination = this.#destinations.find((d) => d.name === destinationName);
+    const destination = (this.#destinations || []).find((d) => d.name === destinationName);
 
-    this.updateElement({
-      destinationId: destination.id,
-      cityName: destination.name
-    });
+    if (destination) {
+      this.updateElement({
+        destinationId: destination.id,
+        cityName: destination.name
+      });
+    }
   };
 
   #offerChangeHandler = (evt) => {

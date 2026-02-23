@@ -4,14 +4,18 @@ import { nanoid } from 'nanoid';
 import { UserAction, UpdateType } from '../const.js';
 
 export default class NewPointPresenter {
-  #pointListContainer = null;
+  #getPointListContainer = null;
+  #destinations = null;
+  #offers = null;
   #handleDataChange = null;
   #handleDestroy = null;
 
   #pointEditComponent = null;
 
-  constructor({ pointListContainer, onDataChange, onDestroy }) {
-    this.#pointListContainer = pointListContainer;
+  constructor({ getPointListContainer, pointListContainer, destinations, offers, onDataChange, onDestroy }) {
+    this.#getPointListContainer = getPointListContainer ?? (() => pointListContainer);
+    this.#destinations = destinations ?? [];
+    this.#offers = offers ?? {};
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
   }
@@ -21,12 +25,27 @@ export default class NewPointPresenter {
       return;
     }
 
+    const defaultPoint = {
+      type: 'Flight',
+      destinationId: this.#destinations[0]?.id ?? null,
+      cityName: this.#destinations[0]?.name ?? '',
+      startTime: new Date(),
+      endTime: new Date(),
+      basePrice: 0,
+      offers: []
+    };
+
     this.#pointEditComponent = new EditFormView({
+      point: defaultPoint,
+      destinations: this.#destinations,
+      offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
+      onFormClose: this.#handleFormClose,
       onDeleteClick: this.#handleDeleteClick
     });
 
-    render(this.#pointEditComponent, this.#pointListContainer, RenderPosition.AFTERBEGIN);
+    const container = this.#getPointListContainer();
+    render(this.#pointEditComponent, container, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
@@ -50,6 +69,10 @@ export default class NewPointPresenter {
       UpdateType.MINOR,
       { id: nanoid(), ...point },
     );
+    this.destroy();
+  };
+
+  #handleFormClose = () => {
     this.destroy();
   };
 

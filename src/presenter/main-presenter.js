@@ -2,6 +2,7 @@ import TripInfoView from '../view/trip-info-view.js';
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
+import NoPointView from '../view/no-point-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import { filter } from '../utils.js';
@@ -13,7 +14,7 @@ export default class MainPresenter {
   #tripModel = null;
   #pointListComponent = new PointListView();
   #tripInfoComponent = new TripInfoView();
-  #filtersComponent = new FiltersView();
+  #filtersComponent = null;
   #sortComponent = null;
   #pointPresenters = new Map();
   #newPointPresenter = null;
@@ -34,7 +35,9 @@ export default class MainPresenter {
     this.#tripModel = tripModel;
 
     this.#newPointPresenter = new NewPointPresenter({
-      taskListContainer: this.#pointListComponent.element,
+      getPointListContainer: () => this.#pointListComponent.element,
+      destinations: this.#tripModel.destinations,
+      offers: this.#tripModel.offers,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy
     });
@@ -84,6 +87,17 @@ export default class MainPresenter {
   }
 
   #renderFilters() {
+    const filters = Object.values(FILTER_TYPE).map((type) => ({
+      type,
+      count: filter[type](this.#tripModel.points).length
+    }));
+
+    this.#filtersComponent = new FiltersView({
+      filters,
+      currentFilterType: this.#filterModel.filter,
+      onFilterTypeChange: this.#handleFilterTypeChange
+    });
+
     render(this.#filtersComponent, this.#filtersContainer);
   }
 
@@ -93,12 +107,11 @@ export default class MainPresenter {
     const pointCount = points.length;
 
     if (pointCount === 0) {
-      this.#noPointComponent();
+      this.#noPointComponent = new NoPointView({ filterType: this.#filterModel.filter });
+      render(this.#noPointComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
       return;
     }
 
-    this.#renderTripInfo();
-    this.#renderFilters();
     this.#renderPoints(points);
     this.#renderSort();
   }
@@ -144,7 +157,7 @@ export default class MainPresenter {
         this.#renderMain();
         break;
       case UpdateType.MAJOR:
-        this.#clearMain({ resetRenderedTaskCount: true, resetSortType: true });
+        this.#clearMain({ resetSortType: true });
         this.#renderMain();
         break;
     }
@@ -155,13 +168,21 @@ export default class MainPresenter {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
+  #handleFilterTypeChange = (filterType) => {
+    if (this.#filterModel.filter === filterType) {
+      return;
+    }
+
+    this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
+  };
+
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
     }
 
     this.#currentSortType = sortType;
-    this.#clearMain({ resetRenderedTaskCount: true });
+    this.#clearMain();
     this.#renderMain();
   };
 
@@ -173,6 +194,9 @@ export default class MainPresenter {
     remove(this.#sortComponent);
     remove(this.#pointListComponent);
     remove(this.#tripInfoComponent);
+    if (this.#filtersComponent) {
+      remove(this.#filtersComponent);
+    }
 
     if (this.#noPointComponent) {
       remove(this.#noPointComponent);

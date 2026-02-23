@@ -56,6 +56,6 @@ export default class FilterPresenter {
       return;
     }
 
-    this.#filterModel.setFilter(UpdateType.MAJOR, FILTER_TYPE);
+    this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
 }
