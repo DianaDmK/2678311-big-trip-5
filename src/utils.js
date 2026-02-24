@@ -88,17 +88,17 @@ const filter = {
   [FILTER_TYPE.EVERYTHING]: (points) => points,
 
   [FILTER_TYPE.FUTURE]: (points) => points.filter((point) =>
-    (point.startDate ?? point.startTime) && isDateFuture(point.startDate ?? point.startTime)
+    point.startTime && isDateFuture(point.startTime)
   ),
 
   [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => {
-    const start = point.startDate ?? point.startTime;
-    const end = point.endDate ?? point.endTime;
+    const start = point.startTime;
+    const end = point.endTime;
     return start && end && isDatePresent(start, end);
   }),
 
   [FILTER_TYPE.PAST]: (points) => points.filter((point) =>
-    (point.endDate ?? point.endTime) && isDatePast(point.endDate ?? point.endTime)
+    point.endTime && isDatePast(point.endTime)
   )
 };
 

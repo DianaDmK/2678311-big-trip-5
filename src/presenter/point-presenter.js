@@ -31,7 +31,6 @@ export default class PointPresenter {
       point: this.#point,
       offers: this.#offers,
       onEditClick: this.#handleEditClick,
-      onArchiveClick: this.#handleArchiveClick,
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
@@ -97,14 +96,6 @@ export default class PointPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       { ...this.#point, isFavorite: !this.#point.isFavorite },
-    );
-  };
-
-  #handleArchiveClick = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      { ...this.#point, isArchive: !this.#point.isArchive },
     );
   };
 

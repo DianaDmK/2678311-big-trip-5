@@ -1,5 +1,4 @@
 import TripInfoView from '../view/trip-info-view.js';
-import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import NoPointView from '../view/no-point-view.js';
@@ -84,21 +83,6 @@ export default class MainPresenter {
 
   #renderTripInfo() {
     render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderFilters() {
-    const filters = Object.values(FILTER_TYPE).map((type) => ({
-      type,
-      count: filter[type](this.#tripModel.points).length
-    }));
-
-    this.#filtersComponent = new FiltersView({
-      filters,
-      currentFilterType: this.#filterModel.filter,
-      onFilterTypeChange: this.#handleFilterTypeChange
-    });
-
-    render(this.#filtersComponent, this.#filtersContainer);
   }
 
   #renderMain() {

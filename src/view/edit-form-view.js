@@ -152,7 +152,7 @@ function createEditFormTemplate(state, availableOffers, destinations) {
               id="event-price-1"
               type="text"
               name="event-price"
-              value="${basePrice}"
+              value="${he.encode(String(basePrice))}"
             >
           </div>
           <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -269,8 +269,9 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #priceInputHandler = (evt) => {
+    const value = evt.target.value.replace(/\D/g, '');
     this.updateElement({
-      basePrice: evt.target.value
+      basePrice: value
     });
   };
 
