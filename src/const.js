@@ -73,6 +73,25 @@ const SORT_TYPE = {
 
 const DATE_FORMAT = 'd/m/y H:i';
 
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+const FILTER_TYPE = {
+  EVERYTHING: 'Everything',
+  FUTURE: 'Future',
+  PRESENT: 'Present',
+  PAST: 'Past'
+};
+
 export {
   TYPES,
   DESCRIPTION,
@@ -90,5 +109,8 @@ export {
   POINT_COUNT,
   MODE,
   SORT_TYPE,
-  DATE_FORMAT
+  DATE_FORMAT,
+  UserAction,
+  UpdateType,
+  FILTER_TYPE
 };

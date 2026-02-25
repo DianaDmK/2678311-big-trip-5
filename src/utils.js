@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { FILTER_TYPE } from './const.js';
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
@@ -60,12 +61,46 @@ function sortPointByPrice(pointA, pointB) {
   return pointB.basePrice - pointA.basePrice;
 }
 
-function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
-}
 function formatDateTime(date) {
   return dayjs(date).format('DD/MM/YY HH:mm');
 }
+
+function isDatesEqual(dateA, dateB) {
+  return (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+}
+
+function isDateFuture(date) {
+  return date && dayjs(date).isAfter(dayjs());
+}
+
+function isDatePast(date) {
+  return date && dayjs(date).isBefore(dayjs());
+}
+
+function isDatePresent(startDate, endDate) {
+  const now = dayjs();
+  return startDate && endDate &&
+    !now.isBefore(startDate) &&
+    !now.isAfter(endDate);
+}
+
+const filter = {
+  [FILTER_TYPE.EVERYTHING]: (points) => points,
+
+  [FILTER_TYPE.FUTURE]: (points) => points.filter((point) =>
+    point.startTime && isDateFuture(point.startTime)
+  ),
+
+  [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => {
+    const start = point.startTime;
+    const end = point.endTime;
+    return start && end && isDatePresent(start, end);
+  }),
+
+  [FILTER_TYPE.PAST]: (points) => points.filter((point) =>
+    point.endTime && isDatePast(point.endTime)
+  )
+};
 
 export {
   getRandomInt,
@@ -79,6 +114,7 @@ export {
   sortPointByDay,
   sortPointByTime,
   sortPointByPrice,
-  updateItem,
-  formatDateTime
+  formatDateTime,
+  isDatesEqual,
+  filter
 };

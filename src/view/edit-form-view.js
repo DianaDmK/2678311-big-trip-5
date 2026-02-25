@@ -3,6 +3,7 @@ import { formatDateTime } from '../utils.js';
 import { DATE_FORMAT } from '../const.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 const POINTS_TYPE = [
   'Taxi', 'Bus', 'Train', 'Ship', 'Drive',
@@ -66,6 +67,7 @@ function createOffersList(offersByType, pointType, selectedOfferIds) {
 }
 
 function createEditFormTemplate(state, availableOffers, destinations) {
+  // const destList = destinations ?? [];
   const {
     type: currentType,
     destinationId,
@@ -114,7 +116,7 @@ function createEditFormTemplate(state, availableOffers, destinations) {
           </div>
           <div class="event__field-group event__field-group--destination">
             <label class="event__label event__type-output" for="event-destination-1">
-              ${currentType}
+              ${he.encode(currentType)}
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${selectedDestName}" list="destination-list-1" />
             <datalist id="destination-list-1">
@@ -150,7 +152,7 @@ function createEditFormTemplate(state, availableOffers, destinations) {
               id="event-price-1"
               type="text"
               name="event-price"
-              value="${basePrice}"
+              value="${he.encode(String(basePrice))}"
             >
           </div>
           <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -188,14 +190,16 @@ export default class EditFormView extends AbstractStatefulView {
   #datepickerEnd = null;
   #destinations = null;
   #offers = null;
+  #handleDeleteClick = null;
 
-  constructor({ point, destinations, offers, onFormSubmit, onFormClose }) {
+  constructor({ point, destinations, offers, onFormSubmit, onFormClose, onDeleteClick }) {
     super();
     this._setState(EditFormView.parseFormDataToState(point));
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
     this.#destinations = destinations;
     this.#offers = offers;
+    this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
   }
@@ -210,10 +214,16 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
-    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceInputHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
     this.#setDatepickerStart();
     this.#setDatepickerEnd();
   }
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(EditFormView.parseFormDataToState(this._state));
+  };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
@@ -235,12 +245,14 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     const destinationName = evt.target.value;
-    const destination = this.#destinations.find((d) => d.name === destinationName);
+    const destination = (this.#destinations || []).find((d) => d.name === destinationName);
 
-    this.updateElement({
-      destinationId: destination.id,
-      cityName: destination.name
-    });
+    if (destination) {
+      this.updateElement({
+        destinationId: destination.id,
+        cityName: destination.name
+      });
+    }
   };
 
   #offerChangeHandler = (evt) => {
@@ -257,8 +269,9 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #priceInputHandler = (evt) => {
+    const value = evt.target.value.replace(/\D/g, '');
     this.updateElement({
-      basePrice: evt.target.value
+      basePrice: value
     });
   };
 

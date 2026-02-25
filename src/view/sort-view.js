@@ -36,10 +36,11 @@ function createSortTemplate(currentSortType) {
 
 export default class Sort extends AbstractView {
   #handleSortTypeChange = null;
-  #currentSortType = SORT_TYPE.DAY;
+  #currentSortType = null;
 
-  constructor({ onSortTypeChange }) {
+  constructor({ currentSortType, onSortTypeChange }) {
     super();
+    this.#currentSortType = currentSortType;
     this.#handleSortTypeChange = onSortTypeChange;
     this.element.addEventListener('change', this.#sortTypeChangeHandler);
   }
